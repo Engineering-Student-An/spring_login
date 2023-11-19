@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="|${pageName}|"></title>
+</head>
+<body>
+<div>
+    <h1><a th:href="|/${loginType}|">[[${pageName}]]</a></h1> <hr/>
+    <h2>로그인</h2>
+    <form th:method="post" th:action="|@{/{loginType}/login (loginType=${loginType})}|" th:object="${loginRequest}">
+        <div>
+            <label th:for="loginId">로그인 아이디 : </label>
+            <input type="text" th:field="*{loginId}"/>
+        </div>
+        <br/>
+        <div>
+            <label th:for="password">비밀번호 : </label>
+            <input type="password" th:field="*{password}"/>
+        </div>
+        <div th:if="${#fields.hasGlobalErrors()}">
+            <br/>
+            <div class="error-class" th:each="error : ${#fields.globalErrors()}" th:text="${error}" />
+        </div>
+        <br/>
+        <button type="submit">로그인</button>
+        <button type="button" th:onclick="|location.href='@{/{loginType}/join (loginType=${loginType})}'|">회원 가입</button> <br/><br/>
+    </form>
+</div>
+</body>
+</html>
+
+<style>
+    .error-class {
+        color: red;
+    }
+    .error-input {
+        border-color: red;
+    }
+</style>
