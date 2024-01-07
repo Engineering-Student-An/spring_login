@@ -107,17 +107,14 @@ public class SecurityLoginController {
 
         Member loginMember = memberService.getLoginMemberByLoginId(auth.getName());
 
-        System.out.println("loginMember.getName() = " + loginMember.getName());
-
         model.addAttribute("member", loginMember);
         return "info";
     }
     @GetMapping("/admin")
-    public String adminPage(@SessionAttribute(name = "memberId", required = false) Long memberId, Model model) {
+    public String adminPage(Model model) {
 
         model.addAttribute("loginType", "security-login");
         model.addAttribute("pageName", "스프링 시큐리티  로그인");
-
 
         return "admin";
     }
