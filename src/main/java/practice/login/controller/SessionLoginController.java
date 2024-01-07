@@ -9,28 +9,28 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import practice.login.domain.User;
-import practice.login.domain.UserRole;
+import practice.login.domain.Member;
+import practice.login.domain.MemberRole;
 import practice.login.domain.dto.JoinRequest;
 import practice.login.domain.dto.LoginRequest;
-import practice.login.service.UserService;
+import practice.login.service.MemberService;
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/session-login")
 public class SessionLoginController {
 
-    private final UserService userService;
+    private final MemberService memberService;
 
     @GetMapping(value = {"", "/"})
-    public String home(Model model, @SessionAttribute(name = "userId", required = false) Long userId) {
+    public String home(Model model, @SessionAttribute(name = "memberId", required = false) Long memberId) {
         model.addAttribute("loginType", "session-login");
         model.addAttribute("pageName", "세션로그인");
 
-        User loginUser = userService.getLoginUserById(userId);
+        Member loginMember = memberService.getLoginMemberById(memberId);
 
-        if (loginUser != null) {
-            model.addAttribute("nickname", loginUser.getNickname());
+        if (loginMember != null) {
+            model.addAttribute("name", loginMember.getName());
         }
 
         return "home";
@@ -38,41 +38,48 @@ public class SessionLoginController {
 
     @GetMapping("/join")
     public String joinPage(Model model) {
+
         model.addAttribute("loginType", "session-login");
         model.addAttribute("pageName", "세션로그인");
 
+        // 회원가입을 위해서 model 통해서 joinRequest 전달
         model.addAttribute("joinRequest", new JoinRequest());
         return "join";
     }
 
     @PostMapping("/join")
-    public String join(@Valid @ModelAttribute JoinRequest joinRequest, BindingResult bindingResult, Model model) {
+    public String join(@Valid @ModelAttribute JoinRequest joinRequest,
+                       BindingResult bindingResult, Model model) {
 
         model.addAttribute("loginType", "session-login");
         model.addAttribute("pageName", "세션로그인");
 
-        if (userService.checkLoginIdDuplicate(joinRequest.getLoginId())) {
-            bindingResult.addError(new FieldError("joinRequest", "loginId", "로그인 아이디가 중복입니다."));
+        // ID 중복 여부 확인
+        if (memberService.checkLoginIdDuplicate(joinRequest.getLoginId())) {
+            bindingResult.addError(new FieldError("joinRequest", "loginId", "ID가 존재합니다."));
         }
 
-        if (userService.checkNicknameDuplicate(joinRequest.getNickname())) {
-            bindingResult.addError(new FieldError("joinRequest", "nickname", "닉네임이 중복입니다."));
-        }
 
+        // 비밀번호 = 비밀번호 체크 여부 확인
         if (!joinRequest.getPassword().equals(joinRequest.getPasswordCheck())) {
-            bindingResult.addError(new FieldError("joinRequest", "passwordCheck", "비밀번호가 다릅니다."));
+            bindingResult.addError(new FieldError("joinRequest", "passwordCheck", "비밀번호가 일치하지 않습니다."));
         }
 
+        // 에러가 존재할 시 다시 join.html로 전송
         if (bindingResult.hasErrors()) {
             return "join";
         }
 
-        userService.join(joinRequest);
+        // 에러가 존재하지 않을 시 joinRequest 통해서 회원가입 완료
+        memberService.join(joinRequest);
+
+        // 회원가입 시 홈 화면으로 이동
         return "redirect:/session-login";
     }
 
     @GetMapping("/login")
     public String loginPage(Model model) {
+
         model.addAttribute("loginType", "session-login");
         model.addAttribute("pageName", "세션로그인");
 
@@ -86,9 +93,9 @@ public class SessionLoginController {
         model.addAttribute("loginType", "session-login");
         model.addAttribute("pageName", "세션로그인");
 
-        User user = userService.login(loginRequest);
+        Member member = memberService.login(loginRequest);
 
-        if (user == null) {
+        if (member == null) {
             bindingResult.reject("loginFail", "로그인 아이디 또는 비밀번호가 틀렸습니다.");
         }
 
@@ -99,7 +106,7 @@ public class SessionLoginController {
         httpServletRequest.getSession().invalidate();
         HttpSession httpSession = httpServletRequest.getSession(true);
 
-        httpSession.setAttribute("userId", user.getId());
+        httpSession.setAttribute("memberId", member.getId());
         httpSession.setMaxInactiveInterval(1800);
 
         return "redirect:/session-login";
@@ -119,32 +126,33 @@ public class SessionLoginController {
     }
 
     @GetMapping("/info")
-    public String userInfo(@SessionAttribute(name = "userId", required = false) Long userId, Model model) {
+    public String memberInfo(@SessionAttribute(name = "memberId", required = false) Long memberId, Model model) {
         model.addAttribute("loginType", "session-login");
         model.addAttribute("pageName", "세션로그인");
 
-        User loginUser = userService.getLoginUserById(userId);
+        Member loginMember = memberService.getLoginMemberById(memberId);
 
-        if (loginUser == null) {
+        if (loginMember == null) {
             return "redirect:/session-login/login";
         }
 
-        model.addAttribute("user", loginUser);
+        model.addAttribute("member", loginMember);
         return "info";
     }
     @GetMapping("/admin")
-    public String adminPage(@SessionAttribute(name = "userId", required = false) Long userId, Model model) {
-        model.addAttribute("loginType", "cookie-login");
-        model.addAttribute("pageName", "쿠키 로그인");
+    public String adminPage(@SessionAttribute(name = "memberId", required = false) Long memberId, Model model) {
 
-        User loginUser = userService.getLoginUserById(userId);
+        model.addAttribute("loginType", "session-login");
+        model.addAttribute("pageName", "세션 로그인");
 
-        if(loginUser == null) {
-            return "redirect:/cookie-login/login";
+        Member loginMember = memberService.getLoginMemberById(memberId);
+
+        if(loginMember == null) {
+            return "redirect:/session-login/login";
         }
 
-        if(!loginUser.getRole().equals(UserRole.ADMIN)) {
-            return "redirect:/cookie-login";
+        if(!loginMember.getRole().equals(MemberRole.ADMIN)) {
+            return "redirect:/session-login";
         }
 
         return "admin";

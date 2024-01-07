@@ -9,29 +9,29 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import practice.login.domain.User;
-import practice.login.domain.UserRole;
+import practice.login.domain.Member;
+import practice.login.domain.MemberRole;
 import practice.login.domain.dto.JoinRequest;
 import practice.login.domain.dto.LoginRequest;
-import practice.login.service.UserService;
+import practice.login.service.MemberService;
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/cookie-login")
 public class CookieLoginController {
 
-    private final UserService userService;
+    private final MemberService memberService;
 
     @GetMapping(value = {"", "/"})
-    public String home(@CookieValue(name = "userId", required = false)
-                           Long userId, Model model) {
+    public String home(@CookieValue(name = "memberId", required = false)
+                           Long memberId, Model model) {
         model.addAttribute("loginType", "cookie-login");
         model.addAttribute("pageName", "쿠키 로그인");
 
-        User loginUser = userService.getLoginUserById(userId);
+        Member loginMember = memberService.getLoginMemberById(memberId);
 
-        if (loginUser != null) {
-            model.addAttribute("nickname", loginUser.getNickname());
+        if (loginMember != null) {
+            model.addAttribute("name", loginMember.getName());
         }
 
         return "home";
@@ -53,19 +53,12 @@ public class CookieLoginController {
         model.addAttribute("loginType", "cookie-login");
         model.addAttribute("pageName", "쿠키 로그인");
 
-        if(userService.checkLoginIdDuplicate(joinRequest.getLoginId())){
+        if(memberService.checkLoginIdDuplicate(joinRequest.getLoginId())){
             bindingResult.addError(new FieldError
                     ("joinRequest",
                     "loginId",
-                    "로그인 아이디가 중복됩니다."));
+                    "ID가 존재합니다."));
 
-        }
-
-        if (userService.checkNicknameDuplicate(joinRequest.getNickname())) {
-            bindingResult.addError(new FieldError(
-                    "joinRequest",
-                    "nickname",
-                    "닉네임이 중복됩니다."));
         }
 
         if(!joinRequest.getPassword().equals(joinRequest.getPasswordCheck())){
@@ -79,7 +72,7 @@ public class CookieLoginController {
             return "join";
         }
 
-        userService.join(joinRequest);
+        memberService.join(joinRequest);
         return "redirect:/cookie-login";
     }
 
@@ -98,10 +91,10 @@ public class CookieLoginController {
         model.addAttribute("loginType", "cookie-login");
         model.addAttribute("pageName", "쿠키 로그인");
 
-        User user = userService.login(loginRequest);
+        Member member = memberService.login(loginRequest);
 
         // 로그인 아이디나 비밀번호가 틀린 경우 global error return
-        if(user == null) {
+        if(member == null) {
             bindingResult.reject("loginFail", "로그인 아이디 또는 비밀번호가 틀렸습니다.");
         }
 
@@ -110,7 +103,7 @@ public class CookieLoginController {
         }
 
         // 로그인 성공 => 쿠키 생성
-        Cookie cookie = new Cookie("userId", String.valueOf(user.getId()));
+        Cookie cookie = new Cookie("memberId", String.valueOf(member.getId()));
         cookie.setMaxAge(60 * 60);  // 쿠키 유효 시간 : 1시간
         response.addCookie(cookie);
 
@@ -122,39 +115,41 @@ public class CookieLoginController {
         model.addAttribute("loginType", "cookie-login");
         model.addAttribute("pageName", "쿠키 로그인");
 
-        Cookie cookie = new Cookie("userId", null);
+        Cookie cookie = new Cookie("memberId", null);
         cookie.setMaxAge(0);
         response.addCookie(cookie);
         return "redirect:/cookie-login";
     }
 
     @GetMapping("/info")
-    public String userInfo(@CookieValue(name = "userId", required = false) Long userId, Model model) {
+    public String info(@CookieValue(name = "memberId", required = false) Long memberId, Model model) {
+
         model.addAttribute("loginType", "cookie-login");
         model.addAttribute("pageName", "쿠키 로그인");
 
-        User loginUser = userService.getLoginUserById(userId);
+        Member loginMember = memberService.getLoginMemberById(memberId);
 
-        if(loginUser == null) {
+        if(loginMember == null) {
             return "redirect:/cookie-login/login";
         }
 
-        model.addAttribute("user", loginUser);
+        model.addAttribute("member", loginMember);
         return "info";
     }
 
     @GetMapping("/admin")
-    public String adminPage(@CookieValue(name = "userId", required = false) Long userId, Model model) {
+    public String adminPage(@CookieValue(name = "memberId", required = false) Long memberId, Model model) {
+
         model.addAttribute("loginType", "cookie-login");
         model.addAttribute("pageName", "쿠키 로그인");
 
-        User loginUser = userService.getLoginUserById(userId);
+        Member loginMember = memberService.getLoginMemberById(memberId);
 
-        if(loginUser == null) {
+        if(loginMember == null) {
             return "redirect:/cookie-login/login";
         }
 
-        if(!loginUser.getRole().equals(UserRole.ADMIN)) {
+        if(!loginMember.getRole().equals(MemberRole.ADMIN)) {
             return "redirect:/cookie-login";
         }
 

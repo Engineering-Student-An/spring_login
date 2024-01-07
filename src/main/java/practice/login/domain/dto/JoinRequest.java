@@ -4,40 +4,40 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import practice.login.domain.UserRole;
-import practice.login.domain.User;
+import practice.login.domain.Member;
+import practice.login.domain.MemberRole;
 
 @Getter @Setter
 @NoArgsConstructor
 public class JoinRequest {
 
-    @NotBlank(message = "로그인 아이디가 비어있습니다.")
+    @NotBlank(message = "ID를 입력하세요.")
     private String loginId;
 
-    @NotBlank(message = "비밀번호가 비어있습니다.")
+    @NotBlank(message = "비밀번호를 입력하세요.")
     private String password;
     private String passwordCheck;
 
-    @NotBlank(message = "닉네임이 비어있습니다.")
-    private String nickname;
+    @NotBlank(message = "이름을 입력하세요.")
+    private String name;
 
     // 비밀번호 암호화 X
-    public User toEntity(){
-        return User.builder()
+    public Member toEntity(){
+        return Member.builder()
                 .loginId(this.loginId)
                 .password(this.password)
-                .nickname(this.nickname)
-                .role(UserRole.USER)
+                .name(this.name)
+                .role(MemberRole.ADMIN)
                 .build();
     }
 
     // 비밀번호 암호화
-    public User toEntity(String encodedPassword) {
-        return User.builder()
-                .loginId(this.loginId)
-                .password(encodedPassword)
-                .nickname(this.nickname)
-                .role(UserRole.USER)
-                .build();
-    }
+//    public Member toEntity(String encodedPassword) {
+//        return Member.builder()
+//                .loginId(this.loginId)
+//                .password(encodedPassword)
+//                .name(this.nickname)
+//                .role(MemberRole.USER)
+//                .build();
+//    }
 }
