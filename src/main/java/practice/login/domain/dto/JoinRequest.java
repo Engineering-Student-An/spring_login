@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import practice.login.domain.Member;
-import practice.login.domain.MemberRole;
 
 @Getter @Setter
 @NoArgsConstructor
@@ -27,7 +26,7 @@ public class JoinRequest {
                 .loginId(this.loginId)
                 .password(this.password)
                 .name(this.name)
-                .role(MemberRole.ADMIN)
+                .role("ROLE_ADMIN")
                 .build();
     }
 

@@ -5,6 +5,9 @@ spring:
     username: login_user
     password: justiff0801
     driver-class-name: com.mysql.cj.jdbc.Driver
+  jwt:
+    secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaaaaaaaaaaaaabbbbb
+
   # JPA 설정
   jpa:
     hibernate:

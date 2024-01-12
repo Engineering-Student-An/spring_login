@@ -45,7 +45,7 @@ public class MemberService {
             return null;
         }
 
-        if (!findMember.getPassword().equals(loginRequest.getPassword())) {
+        if (!bCryptPasswordEncoder.matches(loginRequest.getPassword(), findMember.getPassword())) {
             return null;
         }
 
@@ -67,12 +67,4 @@ public class MemberService {
 
     }
 
-//    public User getLoginUserByLoginId(String loginId){
-//        if(loginId == null) return null;
-//
-//        Optional<User> optionalUser = memberRepository.findByLoginId(loginId);
-//        if(optionalUser.isEmpty()) return null;
-//
-//        return optionalUser.get();
-//    }
 }
