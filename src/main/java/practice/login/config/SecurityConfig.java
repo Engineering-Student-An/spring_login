@@ -3,31 +3,25 @@ package practice.login.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import practice.login.jwt.JWTFilter;
-import practice.login.jwt.JWTUtil;
-import practice.login.jwt.LoginFilter;
+import practice.login.domain.MemberRole;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AuthenticationConfiguration configuration;
-    private final JWTUtil jwtUtil;
+//    private final AuthenticationConfiguration configuration;
+//    private final JWTUtil jwtUtil;
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-
-        return configuration.getAuthenticationManager();
-    }
+//    @Bean
+//    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+//
+//        return configuration.getAuthenticationManager();
+//    }
 
 
     // 시큐리티 필터 메서드
@@ -67,32 +61,60 @@ public class SecurityConfig {
 
 
         // ================== 스프링 시큐리티 jwt 로그인 설정 ==================
-
-        http
-                .csrf((auth) -> auth.disable());
-        http
-                .formLogin((auth) -> auth.disable());
-        http
-                .httpBasic((auth -> auth.disable()));
-
-
+//
+//        http
+//                .csrf((auth) -> auth.disable());
+//        http
+//                .formLogin((auth) -> auth.disable());
+//        http
+//                .httpBasic((auth -> auth.disable()));
+//
+//
+//        http
+//                .authorizeHttpRequests((auth) -> auth
+//                        .requestMatchers("/jwt-login", "/jwt-login/", "/jwt-login/login", "/jwt-login/join").permitAll()
+//                        .requestMatchers("/jwt-login/admin").hasRole("ADMIN")
+//                        .anyRequest().authenticated()
+//                );
+//
+//        http
+//                .sessionManagement((session) -> session
+//                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+//
+//        http
+//                .addFilterAt(new LoginFilter(authenticationManager(configuration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+//
+//        http
+//                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+        // ========= oauth login =========== //
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/jwt-login", "/jwt-login/", "/jwt-login/login", "/jwt-login/join").permitAll()
-                        .requestMatchers("/jwt-login/admin").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .requestMatchers("/oauth-login/admin").hasRole(MemberRole.ADMIN.name())
+                        .requestMatchers("/oauth-login/info").authenticated()
+                        .anyRequest().permitAll()
                 );
 
         http
-                .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .formLogin((auth) -> auth.loginPage("/oauth-login/login")
+                        .loginProcessingUrl("/oauth-login/loginProc")
+                        .usernameParameter("loginId")
+                        .passwordParameter("password")
+                        .defaultSuccessUrl("/oauth-login")
+                        .failureUrl("/oauth-login/login")
+                        .permitAll());
 
         http
-                .addFilterAt(new LoginFilter(authenticationManager(configuration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .oauth2Login((auth) -> auth.loginPage("/oauth-login/login")
+                        .defaultSuccessUrl("/oauth-login")
+                        .failureUrl("/oauth-login/login")
+                        .permitAll());
 
         http
-                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+                .logout((auth) -> auth
+                        .logoutUrl("/oauth-login/logout"));
 
+        http
+                .csrf((auth) -> auth.disable());
 
         return http.build();
     }

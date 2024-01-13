@@ -14,17 +14,16 @@ spring:
 #      ddl-auto: create
     show-sql: true
 
-  # OAuth 로그인
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          google:
-#            client-id: Environment Variables로 등록
-#            client-secret: Environment Variables로 등록
-#            scope:
-#              - email
-#              - profile
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 390333930501-o918up6g7j0r9o0aosiap643gngb0rc9.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
 #
 #          kakao:
 #            client-id: Environment Variables로 등록
