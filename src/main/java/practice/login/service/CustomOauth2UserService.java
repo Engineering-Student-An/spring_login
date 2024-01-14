@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import practice.login.domain.Member;
 import practice.login.domain.MemberRole;
-import practice.login.domain.dto.CustomOauth2UserDetails;
+import practice.login.domain.dto.*;
 import practice.login.repository.MemberRepository;
 
 @Service
@@ -25,8 +25,28 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         log.info("getAttributes : {}",oAuth2User.getAttributes());
 
         String provider = userRequest.getClientRegistration().getRegistrationId();
-        String providerId = oAuth2User.getAttribute("sub");
+
+        OAuth2UserInfo oAuth2UserInfo = null;
+
+        if(provider.equals("google")){
+            log.info("구글 로그인");
+            oAuth2UserInfo = new GoogleUserDetails(oAuth2User.getAttributes());
+
+        } else if (provider.equals("kakao")) {
+            log.info("카카오 로그인");
+            oAuth2UserInfo = new KakaoUserDetails(oAuth2User.getAttributes());
+        } else if (provider.equals("naver")) {
+            log.info("네이버 로그인");
+            oAuth2UserInfo = new NaverUserDetails(oAuth2User.getAttributes());
+        }  else if (provider.equals("facebook")) {
+            log.info("페이스북 로그인");
+            oAuth2UserInfo = new FacebookUserDetails(oAuth2User.getAttributes());
+        }
+
+        String providerId = oAuth2UserInfo.getProviderId();
+        String email = oAuth2UserInfo.getEmail();
         String loginId = provider + "_" + providerId;
+        String name = oAuth2UserInfo.getName();
 
         Member findMember = memberRepository.findByLoginId(loginId);
         Member member;
@@ -34,7 +54,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         if (findMember == null) {
             member = Member.builder()
                     .loginId(loginId)
-                    .name(oAuth2User.getAttribute("name"))
+                    .name(name)
                     .provider(provider)
                     .providerId(providerId)
                     .role(MemberRole.USER)
