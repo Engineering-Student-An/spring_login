@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-public class CustomUserDetails implements UserDetails, OAuth2User {
+public class CustomOauth2UserDetails implements UserDetails, OAuth2User {
 
     private final Member member;
     private Map<String, Object> attributes;
 
-    public CustomUserDetails(Member member, Map<String, Object> attributes) {
+    public CustomOauth2UserDetails(Member member, Map<String, Object> attributes) {
 
         this.member = member;
         this.attributes = attributes;

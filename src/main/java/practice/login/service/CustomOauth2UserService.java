@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import practice.login.domain.Member;
 import practice.login.domain.MemberRole;
-import practice.login.domain.dto.CustomUserDetails;
+import practice.login.domain.dto.CustomOauth2UserDetails;
 import practice.login.repository.MemberRepository;
 
 @Service
@@ -44,6 +44,6 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             member = findMember;
         }
 
-        return new CustomUserDetails(member, oAuth2User.getAttributes());
+        return new CustomOauth2UserDetails(member, oAuth2User.getAttributes());
     }
 }

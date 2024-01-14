@@ -11,7 +11,7 @@ spring:
   # JPA 설정
   jpa:
     hibernate:
-#      ddl-auto: create
+      ddl-auto: create
     show-sql: true
 
   security:
@@ -19,8 +19,8 @@ spring:
       client:
         registration:
           google:
-            client-id: 390333930501-o918up6g7j0r9o0aosiap643gngb0rc9.apps.googleusercontent.com
-            client-secret: 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
+            client-id: 326048053675-7v7efv49t2mcodd6n0qiddtj8ob785kf.apps.googleusercontent.com
+            client-secret: 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
             scope:
               - email
               - profile
