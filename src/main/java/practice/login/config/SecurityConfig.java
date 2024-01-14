@@ -100,7 +100,7 @@ public class SecurityConfig {
                         .usernameParameter("loginId")
                         .passwordParameter("password")
                         .defaultSuccessUrl("/oauth-login")
-                        .failureUrl("/oauth-login/login")
+                        .failureUrl("/oauth-login")
                         .permitAll());
 
         http
